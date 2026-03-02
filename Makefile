@@ -54,9 +54,6 @@ run: build
 	@echo ""
 	$(ROOTDIR)/otelcol-dev/otelcol --config=config.yaml
 
-test:
-	go test -v ./...
-
 clean:
 	rm -rf otelcol-dev/
 	rm -f ./ocb
