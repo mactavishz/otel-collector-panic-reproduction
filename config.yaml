@@ -1,0 +1,37 @@
+receivers:
+  immediatereceiver:
+    # No delay - sends data immediately on Start()
+
+exporters:
+  # Slow OTLP exporter wrapper that delays initialization
+  # This creates a race window where the receiver sends data before
+  # the underlying OTLP exporter's gRPC client is ready
+  slowotlp:
+    startup_delay: 500ms
+    endpoint: localhost:4317
+    tls:
+      insecure: true
+    # Disable queue to make data go directly to the exporter
+    # This is required to trigger the nil pointer panic
+    sending_queue:
+      enabled: false
+    retry_on_failure:
+      enabled: false
+
+  debug:
+    verbosity: detailed
+
+extensions:
+  health_check:
+    endpoint: localhost:13133
+
+service:
+  extensions: [health_check]
+  pipelines:
+    logs:
+      receivers: [immediatereceiver]
+      exporters: [slowotlp, debug]
+
+  telemetry:
+    logs:
+      level: debug
